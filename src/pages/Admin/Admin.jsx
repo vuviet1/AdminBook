@@ -121,7 +121,7 @@ function Employee() {
     }
   };
 
-  const handleDeleteCategory = async (id) => {
+  const handleDeleteAdmin = async (id) => {
     try {
       // Gọi API để xóa category có id tương ứng
       await request.delete(`Admin/id=${id}`);

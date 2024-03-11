@@ -86,6 +86,18 @@ function Category() {
     }
   };
 
+  const handleDeleteCategory = async (id) => {
+    try {
+      // Gọi API để xóa category có id tương ứng
+      await request.delete(`Category/id=${id}`);
+
+      // Tải lại trang sau khi xóa thành công
+      window.location.reload();
+    } catch (error) {
+      console.error("Error while deleting category:", error);
+    }
+  };
+
   const handlePageClick = (event) => {
     const newPage = event.selected;
     setCurrentPage(newPage);

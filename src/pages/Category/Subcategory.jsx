@@ -3,15 +3,17 @@ import Header from "../../Component/header";
 import Navbar from "../../Component/nav";
 import Footer from "../../Component/footer";
 import Table from "react-bootstrap/Table";
-import axios from "axios";
+import request from "../../utils/request";
 
 function SubCategory() {
   const [categories, setCategories] = useState([]);
+  const [name, setName] = useState("");
+  const [parentId, setParentId] = useState(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = async (id) => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/Category/id=${id}`);
+        const response = await request.get(`Category/id=${id}`);
         setCategories(response.data);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -21,14 +23,13 @@ function SubCategory() {
     fetchData();
   }, []);
 
-  const [name, setName] = useState("");
-  const [parentId, setParentId] = useState(null);
+
 
   const handleSubmit = async () => {
     // e.preventDefault();
 
     try {
-      const response = await axios.post("http://localhost:5000/api/Category", {
+      const response = await request.post("Category", {
         name: name,
         parent_id: parentId,
       });
@@ -47,8 +48,8 @@ function SubCategory() {
   const handleEditButtonClick = async (id) => {
     try {
       // Gọi API để lấy dữ liệu category có id tương ứng
-      const response = await axios.get(
-        `http://localhost:5000/api/Category/id=${id}`
+      const response = await request.get(
+        `Category/id=${id}`
       );
       // console.log(response);
 
@@ -69,8 +70,8 @@ function SubCategory() {
   const handleSaveChanges = async () => {
     // Gọi API để lưu thay đổi cho category có id là selectedCategoryId
     try {
-      await axios.put(
-        `http://localhost:5000/api/Category/id=${selectedCategoryId}`,
+      await request.put(
+        `Category/id=${selectedCategoryId}`,
         selectedCategory
       );
       console.log(selectedCategoryId);
@@ -87,7 +88,7 @@ function SubCategory() {
   const handleDeleteCategory = async (id) => {
     try {
       // Gọi API để xóa category có id tương ứng
-      await axios.delete(`http://localhost:5000/api/Category/id=${id}`);
+      await request.delete(`Category/id=${id}`);
 
       // Tải lại trang sau khi xóa thành công
       window.location.reload();
@@ -96,77 +97,9 @@ function SubCategory() {
     }
   };
 
-  function startTime() {
-    // Lấy Object ngày hiện tại
-    const today = new Date();
-
-    // Giờ, phút, giây hiện tại
-    let h = today.getHours();
-    let m = today.getMinutes();
-    let s = today.getSeconds();
-
-    // Ngày hiện tại
-    const curDay = today.getDate();
-
-    // Tháng hiện tại
-    const curMonth = today.getMonth() + 1;
-
-    // Năm hiện tại
-    const curYear = today.getFullYear();
-
-    // Thứ trong tuần
-    const weekdays = [
-      "Chủ nhật",
-      "Thứ hai",
-      "Thứ ba",
-      "Thứ tư",
-      "Thứ năm",
-      "Thứ sáu",
-      "Thứ bảy",
-    ];
-    const curDw = weekdays[today.getDay()];
-
-    // Chuyển đổi sang dạng 01, 02, 03
-    m = checkTime(m);
-    s = checkTime(s);
-
-    // Ghi ra trình duyệt
-    const timerElement = document.getElementById("timer");
-    if (timerElement) {
-      timerElement.innerHTML =
-        curDw +
-        ", " +
-        curDay +
-        "/" +
-        curMonth +
-        "/" +
-        curYear +
-        "    -   " +
-        h +
-        " giờ " +
-        m +
-        " phút " +
-        s +
-        " giây ";
-    }
-
-    // Dùng hàm setTimeout để thiết lập gọi lại 0.5 giây / lần
-    var t = setTimeout(function () {
-      startTime();
-    }, 500);
-  }
-
-  // Hàm này có tác dụng chuyển những số bé hơn 10 thành dạng 01, 02, 03, ...
-  function checkTime(i) {
-    if (i < 10) {
-      i = "0" + i;
-    }
-    return i;
-  }
-
   return (
     <Fragment>
-      <div className="sb-nav-fixed" onLoad={startTime}>
+      <div className="sb-nav-fixed">
         <Header />
         <div id="layoutSidenav">
           <Navbar />
@@ -193,12 +126,6 @@ function SubCategory() {
                     >
                       <div>Quản lý thông tin danh mục con</div>
                       <div />
-                      <div style={{ marginLeft: 750 }}>
-                        <div id="current-time" />
-                        <div>
-                          <div id="timer" />
-                        </div>
-                      </div>
                     </li>
                   </ol>
                 </div>
