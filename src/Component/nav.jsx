@@ -20,7 +20,7 @@ class Navbar extends React.Component {
                                     Bảng điều khiển
                                 </Link>
                                 <div className="sb-sidenav-menu-heading">Quản lý</div>
-                                <Link className="nav-link" to={"/employee"}>
+                                <Link className="nav-link" to={"/admin"}>
                                     <div className="sb-nav-link-icon">
                                         <i className="fa-regular fa-address-card"></i>
                                     </div>
@@ -62,7 +62,7 @@ class Navbar extends React.Component {
                                     </div>
                                     Quản lý vai trò
                                 </Link>
-                                <Link className="nav-link" to={"/permisstion"}>
+                                <Link className="nav-link" to={"/permission"}>
                                     <div className="sb-nav-link-icon">
                                         <i className="fa-brands fas fa-lock"></i>
                                     </div>

@@ -3,22 +3,34 @@ import Header from "../../Component/header";
 import Navbar from "../../Component/nav";
 import Footer from "../../Component/footer";
 import { Link } from "react-router-dom";
-import axios from "axios";
+
+import Table from "react-bootstrap/Table";
+import request from "../../utils/request";
+import Pagination from "../../Component/Pagination";
 
 function Book() {
   const [books, setBooks] = useState([]);
 
+  const [currentPage, setCurrentPage] = useState(0);
+  const itemsPerPage = 5;
+  
   useEffect(() => {
-    fetch("http://localhost:5000/api/Book")
-      .then((response) => response.json())
-      .then((data) => setBooks(data))
-      .catch((error) => console.error("Error fetching data:", error));
-  }, []);
+    const fetchData = async () => {
+      try {
+        const response = await request.get("Book");
+        setBooks(response.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, [request]);
 
   const handleDeleteBook = async (id) => {
     try {
-      // Gọi API để xóa book có id tương ứng
-      await axios.delete(`http://localhost:5000/api/Book/id=${id}`);
+      // Gọi API để xóa category có id tương ứng
+      await request.delete(`Book/id=${id}`);
 
       // Tải lại trang sau khi xóa thành công
       window.location.reload();
@@ -27,80 +39,17 @@ function Book() {
     }
   };
 
-  useEffect(() => {
-    startTime();
-  }, []);
+  const handlePageClick = (event) => {
+    const newPage = event.selected;
+    setCurrentPage(newPage);
+  };
 
-  function startTime() {
-    // Lấy Object ngày hiện tại
-    const today = new Date();
-
-    // Giờ, phút, giây hiện tại
-    let h = today.getHours();
-    let m = today.getMinutes();
-    let s = today.getSeconds();
-
-    // Ngày hiện tại
-    const curDay = today.getDate();
-
-    // Tháng hiện tại
-    const curMonth = today.getMonth() + 1;
-
-    // Năm hiện tại
-    const curYear = today.getFullYear();
-
-    // Thứ trong tuần
-    const weekdays = [
-      "Chủ nhật",
-      "Thứ hai",
-      "Thứ ba",
-      "Thứ tư",
-      "Thứ năm",
-      "Thứ sáu",
-      "Thứ bảy",
-    ];
-    const curDw = weekdays[today.getDay()];
-
-    // Chuyển đổi sang dạng 01, 02, 03
-    m = checkTime(m);
-    s = checkTime(s);
-
-    // Ghi ra trình duyệt
-    const timerElement = document.getElementById("timer");
-    if (timerElement) {
-      timerElement.innerHTML =
-        curDw +
-        ", " +
-        curDay +
-        "/" +
-        curMonth +
-        "/" +
-        curYear +
-        "    -   " +
-        h +
-        " giờ " +
-        m +
-        " phút " +
-        s +
-        " giây ";
-    }
-
-    // Dùng hàm setTimeout để thiết lập gọi lại 0.5 giây / lần
-    var t = setTimeout(function () {
-      startTime();
-    }, 500);
-  }
-
-  // Hàm này có tác dụng chuyển những số bé hơn 10 thành dạng 01, 02, 03, ...
-  function checkTime(i) {
-    if (i < 10) {
-      i = "0" + i;
-    }
-    return i;
-  }
+  const startIndex = currentPage * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentBooks = books.slice(startIndex, endIndex);
 
   return (
-    <div className="sb-nav-fixed" onLoad={startTime}>
+    <div className="sb-nav-fixed">
       <Header />
       <div id="layoutSidenav">
         <Navbar />
@@ -128,12 +77,6 @@ function Book() {
                   >
                     <div>Bảng điều khiển</div>
                     <div />
-                    <div style={{ marginLeft: 750 }}>
-                      <div id="current-time" />
-                      <div>
-                        <div id="timer" />
-                      </div>
-                    </div>
                   </li>
                 </ol>
               </div>
@@ -166,7 +109,7 @@ function Book() {
                     </div>
                   </div>
                   <div className="card-body">
-                    <table className="table table-hover">
+                    <Table className="table table-hover">
                       <thead>
                         <tr style={{ textAlign: "center" }}>
                           <th>ISBN</th>
@@ -181,9 +124,9 @@ function Book() {
                         </tr>
                       </thead>
                       <tbody>
-                        {books.map((book) => (
+                      {currentBooks.map((book, index) => (
                           <tr
-                            key={book.Id}
+                          key={index}
                             style={{ textAlign: "center", padding: "50px" }}
                           >
                             <td width={"15px"}>{book.Isbn}</td>
@@ -236,7 +179,11 @@ function Book() {
                           </tr>
                         ))}
                       </tbody>
-                    </table>
+                    </Table>
+                    <Pagination
+                        pageCount={Math.ceil(books.length / itemsPerPage)}
+                        handlePageClick={handlePageClick}
+                      />
                   </div>
                 </div>
               </main>

@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import axios from 'axios';
+import request from "../utils/request";
+
 
 function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [loggedIn, setLoggedIn] = useState(localStorage.getItem('loggedIn') === 'true');
   const [error, setError] = useState('');
 
   const handleUsernameChange = (e) => {
@@ -18,13 +18,12 @@ function Login() {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/api/Admin/login', {
+      const response = await request.post('Admin/login', {
         username,
         password,
       });
       console.log(response.data);
       localStorage.setItem('loggedIn', true);
-      setLoggedIn(true);
       window.location.reload();
     } catch (error) {
       console.error('Login error:', error);
@@ -32,7 +31,7 @@ function Login() {
     }
   };
 
-  if (loggedIn) {
+  if (localStorage.getItem('loggedIn') === 'true') {
     return <Navigate to="/dashboard" />;
   }
 

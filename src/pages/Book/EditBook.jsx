@@ -3,7 +3,8 @@ import React, { useEffect, useState } from 'react';
 import Header from "../../Component/header";
 import Navbar from "../../Component/nav";
 import Footer from "../../Component/footer";
-import axios from 'axios';
+
+import request from "../../utils/request";
 import { useParams } from 'react-router-dom';
 
 function EditBook() {
@@ -15,103 +16,37 @@ function EditBook() {
     const [categoryOptions, setCategoryOptions] = useState([]);
 
     useEffect(() => {
-        // Gọi API để lấy dữ liệu category khi component được render
-        fetch('http://localhost:5000/api/Category/byParntId')
-            .then(response => response.json())
-            .then(data => setCategoryOptions(data))
-            .catch(error => console.error('Error fetching categories:', error));
-    }, []);
+        const fetch = async () => {
+          try {
+            const response = await request.get("Category/byParntId");
+            setCategoryOptions(response.data);
+          } catch (error) {
+            console.error("Error fetching data:", error);
+          }
+        };
+    
+        fetch();
+      }, [request]);
+
 
     useEffect(() => {
         const fetchBookDetails = async () => {
-            try {
-                const response = await fetch(`http://localhost:5000/api/Book/id=${id}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    setBook(data);
-                } else {
-                    console.error('Failed to fetch book details:', response.statusText);
-                }
-            } catch (error) {
-                console.error('Error fetching book details:', error);
+          try {
+            const response = await request.get(`Book/id=${id}`);
+            if (response.ok) {
+                const data = await response.json();
+                setBook(data);
+            } else {
+                console.error('Failed to fetch book details:', response.statusText);
             }
+          } catch (error) {
+            console.error("Error fetching data:", error);
+          }
         };
-
+    
         fetchBookDetails();
-    }, [id]);
+      }, [id]);
 
-
-    useEffect(() => {
-        startTime();
-    }, []);
-
-    function startTime() {
-        // Lấy Object ngày hiện tại
-        const today = new Date();
-
-        // Giờ, phút, giây hiện tại
-        let h = today.getHours();
-        let m = today.getMinutes();
-        let s = today.getSeconds();
-
-        // Ngày hiện tại
-        const curDay = today.getDate();
-
-        // Tháng hiện tại
-        const curMonth = today.getMonth() + 1;
-
-        // Năm hiện tại
-        const curYear = today.getFullYear();
-
-        // Thứ trong tuần
-        const weekdays = [
-            "Chủ nhật",
-            "Thứ hai",
-            "Thứ ba",
-            "Thứ tư",
-            "Thứ năm",
-            "Thứ sáu",
-            "Thứ bảy",
-        ];
-        const curDw = weekdays[today.getDay()];
-
-        // Chuyển đổi sang dạng 01, 02, 03
-        m = checkTime(m);
-        s = checkTime(s);
-
-        // Ghi ra trình duyệt
-        const timerElement = document.getElementById("timer");
-        if (timerElement) {
-            timerElement.innerHTML =
-                curDw +
-                ", " +
-                curDay +
-                "/" +
-                curMonth +
-                "/" +
-                curYear +
-                "    -   " +
-                h +
-                " giờ " +
-                m +
-                " phút " +
-                s +
-                " giây ";
-        }
-
-        // Dùng hàm setTimeout để thiết lập gọi lại 0.5 giây / lần
-        var t = setTimeout(function () {
-            startTime();
-        }, 500);
-    }
-
-    // Hàm này có tác dụng chuyển những số bé hơn 10 thành dạng 01, 02, 03, ...
-    function checkTime(i) {
-        if (i < 10) {
-            i = "0" + i;
-        }
-        return i;
-    }
 
     // const [selectedImage, setSelectedImage] = useState(null);
 
@@ -127,7 +62,7 @@ function EditBook() {
     // };
 
     return (
-        <div className="sb-nav-fixed" onLoad={startTime}>
+        <div className="sb-nav-fixed">
             <Header />
             <div id="layoutSidenav">
                 <Navbar />
@@ -275,9 +210,6 @@ function EditBook() {
 
                     <Footer />
                 </div>
-
-                {/*Modal*/}
-                {/*Modal*/}
             </div>
         </div>
     );

@@ -1,20 +1,29 @@
 import React, { Fragment, useEffect, useState, Component } from "react";
+import { Link } from "react-router-dom";
 import Header from "../../Component/header";
 import Navbar from "../../Component/nav";
 import Footer from "../../Component/footer";
+
 import Table from "react-bootstrap/Table";
-import axios from "axios";
-import { Link } from "react-router-dom";
+import Pagination from "../../Component/Pagination";
+import request from "../../utils/request";
+
 
 function Category() {
   const [categories, setCategories] = useState([]);
 
+  const [name, setName] = useState("");
+  const [parentId, setParentId] = useState(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState([]);
+
+  const [currentPage, setCurrentPage] = useState(0);
+  const itemsPerPage = 5;
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:5000/api/Category"
-        );
+        const response = await request.get("Category");
         setCategories(response.data);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -22,46 +31,37 @@ function Category() {
     };
 
     fetchData();
-  }, []);
+  }, [request]);
 
-  const [name, setName] = useState("");
-  const [parentId, setParentId] = useState(null);
 
-  const handleSubmit = async () => {
-    // e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/Category",
-        {
-          name: name,
-          parent_id: parentId,
-        }
-      );
+      const response = await request.post(`Category`, {
+        name: name,
+        parent_id: parentId,
+      });
+
+      console.log("Category added successfully:", response.data); // Add this line
 
       window.location.reload();
-
-      console.log("Category added successfully:", response.data);
     } catch (error) {
       console.error("Failed to add category:", error);
     }
   };
 
-  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
-  const [selectedCategory, setSelectedCategory] = useState([]);
+
 
   const handleEditButtonClick = async (id) => {
     try {
-      // Gọi API để lấy dữ liệu category có id tương ứng
-      const response = await axios.get(
-        `http://localhost:5000/api/Category/id=${id}`
-      );
-      // console.log(response);
+      const response = await request.get(`Category/id=${id}`);
 
       if (response.data) {
-        // Cập nhật state với dữ liệu category
-        setSelectedCategory(response.data);
-        // Lưu id của category được chọn
+        setSelectedCategory({
+          Id: response.data.Id,
+          Name: response.data.Name,
+        });
         setSelectedCategoryId(id);
       } else {
         console.error("No data returned from the API");
@@ -71,108 +71,33 @@ function Category() {
     }
   };
 
-  // Function để lưu thay đổi
+  // Function to save changes
   const handleSaveChanges = async () => {
-    // Gọi API để lưu thay đổi cho category có id là selectedCategoryId
     try {
-      await axios.put(
-        `http://localhost:5000/api/Category/id=${selectedCategoryId}`,
-        selectedCategory
-      );
-      console.log(selectedCategoryId);
-      // Đóng modal khi lưu thành công
-      // document.getElementById('editcategory').modal('hide');
+      await request.put(`Category/id=${selectedCategoryId}`, {
+        Name: selectedCategory.Name,
+      });
+
+      console.log("Changes saved successfully"); // Add this line
+
       window.location.reload();
-      // Tải lại dữ liệu categories
-      // CODE ĐỂ TẢI LẠI DỮ LIỆU CATEGORIES (nếu cần)
     } catch (error) {
       console.error("Error while saving changes:", error);
     }
   };
 
-  const handleDeleteCategory = async (id) => {
-    try {
-      // Gọi API để xóa category có id tương ứng
-      await axios.delete(`http://localhost:5000/api/Category/id=${id}`);
-
-      // Tải lại trang sau khi xóa thành công
-      window.location.reload();
-    } catch (error) {
-      console.error("Error while deleting category:", error);
-    }
+  const handlePageClick = (event) => {
+    const newPage = event.selected;
+    setCurrentPage(newPage);
   };
 
-  function startTime() {
-    // Lấy Object ngày hiện tại
-    const today = new Date();
-
-    // Giờ, phút, giây hiện tại
-    let h = today.getHours();
-    let m = today.getMinutes();
-    let s = today.getSeconds();
-
-    // Ngày hiện tại
-    const curDay = today.getDate();
-
-    // Tháng hiện tại
-    const curMonth = today.getMonth() + 1;
-
-    // Năm hiện tại
-    const curYear = today.getFullYear();
-
-    // Thứ trong tuần
-    const weekdays = [
-        "Chủ nhật",
-        "Thứ hai",
-        "Thứ ba",
-        "Thứ tư",
-        "Thứ năm",
-        "Thứ sáu",
-        "Thứ bảy",
-      ];
-    const curDw = weekdays[today.getDay()];
-
-    // Chuyển đổi sang dạng 01, 02, 03
-    m = checkTime(m);
-    s = checkTime(s);
-
-    // Ghi ra trình duyệt
-    const timerElement = document.getElementById("timer");
-    if (timerElement) {
-      timerElement.innerHTML =
-        curDw +
-        ", " +
-        curDay +
-        "/" +
-        curMonth +
-        "/" +
-        curYear +
-        "    -   " +
-        h +
-        " giờ " +
-        m +
-        " phút " +
-        s +
-        " giây ";
-    }
-
-    // Dùng hàm setTimeout để thiết lập gọi lại 0.5 giây / lần
-    var t = setTimeout(function () {
-      startTime();
-    }, 500);
-  }
-
-  // Hàm này có tác dụng chuyển những số bé hơn 10 thành dạng 01, 02, 03, ...
-  function checkTime(i) {
-    if (i < 10) {
-      i = "0" + i;
-    }
-    return i;
-  }
+  const startIndex = currentPage * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentCategories = categories.slice(startIndex, endIndex);
 
   return (
     <Fragment>
-      <div className="sb-nav-fixed" onLoad={startTime}>
+      <div className="sb-nav-fixed">
         <Header />
         <div id="layoutSidenav">
           <Navbar />
@@ -199,12 +124,6 @@ function Category() {
                     >
                       <div>Quản lý thông tin danh mục</div>
                       <div />
-                      <div style={{ marginLeft: 750 }}>
-                        <div id="current-time" />
-                        <div>
-                          <div id="timer" />
-                        </div>
-                      </div>
                     </li>
                   </ol>
                 </div>
@@ -244,7 +163,7 @@ function Category() {
                           </tr>
                         </thead>
                         <tbody>
-                          {categories.map((category, index) => (
+                        {currentCategories.map((category, index) => (
                             <tr key={index}>
                               <td>{category.Name}</td>
                               {/* <td>{category.ParentId.Name}</td> */}
@@ -272,7 +191,7 @@ function Category() {
                                   <i className="fa-solid fa-trash" />
                                 </button>
                                 <Link
-                                  to={"/Subcategories/" + category.Id}
+                                  to={"/subcategories/" + category.Id}
                                   className="btn btn-info"
                                 >
                                   <i class="fa-solid fa-circle-info"></i>
@@ -282,6 +201,10 @@ function Category() {
                           ))}
                         </tbody>
                       </Table>
+                      <Pagination
+                        pageCount={Math.ceil(categories.length / itemsPerPage)}
+                        handlePageClick={handlePageClick}
+                      />
                     </div>
                   </div>
                 </main>

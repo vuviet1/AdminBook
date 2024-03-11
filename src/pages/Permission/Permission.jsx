@@ -1,38 +1,46 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+
 import Header from "../../Component/header";
 import Navbar from "../../Component/nav";
 import Footer from "../../Component/footer";
+import Table from "react-bootstrap/Table";
+
+import Pagination from "../../Component/Pagination";
+import request from "../../utils/request";
 
 
-function Permisstion() {
+function Permission() {
   // Hiển thị quyền
-  const [permisstions, setPermisstions] = useState([]);
+  const [permissions, setPermissions] = useState([]);
+  const [name, setPermissionName] = useState("");
+
+  const [currentPage, setCurrentPage] = useState(0);
+  const itemsPerPage = 5;
 
   useEffect(() => {
-    const fetchPermisstions = async () => {
+    const fetchPermissions = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:5000/api/Permission"
+        const response = await request.get(
+          "Permission"
         );
-        setPermisstions(response.data);
+        setPermissions(response.data);
       } catch (error) {
         console.error("Error fetching role data:", error);
       }
     };
 
-    fetchPermisstions();
-  }, []);
+    fetchPermissions();
+  }, [request]);
 
   // Thêm quyền
-  const [name, setPermisstionName] = useState("");
+
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/Permission",
+      const response = await request.post(
+        "Permission",
         {
           name: name,
         }
@@ -40,22 +48,22 @@ function Permisstion() {
 
       window.location.reload();
       // Xử lý thành công nếu cần
-      console.log("Permisstion added successfully");
+      console.log("Permission added successfully");
     } catch (error) {
-      console.error("Error adding permisstion:", error.message);
+      console.error("Error adding permission:", error.message);
     }
   };
 
-  const [selectedPermisstion, setSelectedPermisstion] = useState(null);
+  const [selectedPermission, setSelectedPermission] = useState(null);
 
   const handleEditButtonClick = async (id) => {
     try {
-      const response = await axios.get(
-        `http://localhost:5000/api/Permission/id=${id}`
+      const response = await request.get(
+        `Permission/id=${id}`
       );
 
       if (response.data) {
-        setSelectedPermisstion(response.data);
+        setSelectedPermission(response.data);
       } else {
         console.error("No data returned from the API");
       }
@@ -65,14 +73,14 @@ function Permisstion() {
   };
 
   const handleNameChange = (e) => {
-    setSelectedPermisstion({ ...selectedPermisstion, Name: e.target.value });
+    setSelectedPermission({ ...selectedPermission, Name: e.target.value });
   };
 
   const handleSaveChanges = async () => {
     try {
-      await axios.put(
-        `http://localhost:5000/api/Permission/id=${selectedPermisstion.Id}`,
-        selectedPermisstion
+      await request.put(
+        `Permission/id=${selectedPermission.Id}`,
+        selectedPermission
       );
       window.location.reload();
     } catch (error) {
@@ -83,7 +91,7 @@ function Permisstion() {
   const handleDeletePermission = async (id) => {
     try {
       // Gọi API để xóa permission có id tương ứng
-      await axios.delete(`http://localhost:5000/api/Permission/id=${id}`);
+      await request.delete(`Permission/id=${id}`);
 
       // Tải lại trang sau khi xóa thành công
       window.location.reload();
@@ -91,6 +99,15 @@ function Permisstion() {
       console.error("Error while deleting permission:", error);
     }
   };
+
+  const handlePageClick = (event) => {
+    const newPage = event.selected;
+    setCurrentPage(newPage);
+  };
+
+  const startIndex = currentPage * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentPermission = permissions.slice(startIndex, endIndex);
 
   return (
     <div className="sb-nav-fixed">
@@ -149,7 +166,7 @@ function Permisstion() {
                     </div>
                   </div>
                   <div className="card-body">
-                    <table className="table table-hover">
+                    <Table className="table table-hover">
                       <thead>
                         <tr>
                           <th>Tên vai trò</th>
@@ -157,9 +174,9 @@ function Permisstion() {
                         </tr>
                       </thead>
                       <tbody>
-                        {permisstions.map((permisstion) => (
-                          <tr key={permisstion.Id}>
-                            <td>{permisstion.Name}</td>
+                      {currentPermission.map((permission, index) => (
+                          <tr key={index}>
+                            <td>{permission.Name}</td>
                             <td>
                               <button
                                 type="button"
@@ -168,7 +185,7 @@ function Permisstion() {
                                 data-bs-target="#edit_order"
                                 style={{ marginRight: "15px" }}
                                 onClick={() =>
-                                  handleEditButtonClick(permisstion.Id)
+                                  handleEditButtonClick(permission.Id)
                                 }
                               >
                                 <i className="fa-regular fa-pen-to-square" />
@@ -176,7 +193,7 @@ function Permisstion() {
                               <button
                                 className="btn btn-danger"
                                 onClick={() =>
-                                  handleDeletePermission(permisstion.Id)
+                                  handleDeletePermission(permission.Id)
                                 }
                               >
                                 <i className="fa-solid fa-trash" />
@@ -185,7 +202,11 @@ function Permisstion() {
                           </tr>
                         ))}
                       </tbody>
-                    </table>
+                    </Table>
+                    <Pagination
+                      pageCount={Math.ceil(permissions.length / itemsPerPage)}
+                      handlePageClick={handlePageClick}
+                    />
                   </div>
                 </div>
               </main>
@@ -228,7 +249,7 @@ function Permisstion() {
                   <input
                     type="text"
                     className="form-control"
-                    value={selectedPermisstion?.Name}
+                    value={selectedPermission?.Name}
                     onChange={handleNameChange}
                   />
                 </div>
@@ -304,7 +325,7 @@ function Permisstion() {
                       type="text"
                       className="form-control"
                       value={name}
-                      onChange={(e) => setPermisstionName(e.target.value)}
+                      onChange={(e) => setPermissionName(e.target.value)}
                     />
                   </div>
                 </div>
@@ -331,4 +352,4 @@ function Permisstion() {
   );
 }
 
-export default Permisstion;
+export default Permission;

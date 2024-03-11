@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Header from "../../Component/header";
 import Navbar from "../../Component/nav";
 import Footer from "../../Component/footer";
-import axios from 'axios';
+import request from "../../utils/request";
 
 function Book() {
     // const history = useHistory();
@@ -11,7 +11,7 @@ function Book() {
     const [name, setName] = useState('');
     const [price, setPrice] = useState('');
     const [description, setDescription] = useState('');
-    const [imageUrl, setImageUrl] = useState('');
+    // const [imageUrl, setImageUrl] = useState('');
     const [publishYear, setPublishYear] = useState('');
     const [publisher, setPublisher] = useState('');
     const [author, setAuthor] = useState('');
@@ -19,24 +19,30 @@ function Book() {
     const [categoryId, setCategoryId] = useState(0);
     const [categoryOptions, setCategoryOptions] = useState([]);
 
+
     useEffect(() => {
-        // Gọi API để lấy dữ liệu category khi component được render
-        fetch('http://localhost:5000/api/Category')
-            .then(response => response.json())
-            .then(data => setCategoryOptions(data))
-            .catch(error => console.error('Error fetching categories:', error));
-    }, []);
+        const fetchData = async () => {
+          try {
+            const response = await request.get("Category");
+            setCategoryOptions(response.data);
+          } catch (error) {
+            console.error("Error fetching data:", error);
+          }
+        };
+    
+        fetchData();
+      }, [request]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
-            const response = await axios.post('http://localhost:5000/api/Book/AddBook', {
+            const response = await request.post('Book', {
                 isbn,
                 name,
                 price,
                 description,
-                imageUrl,
+                // imageUrl,
                 publishYear: parseInt(publishYear), // Convert to number
                 publisher,
                 author,
@@ -58,78 +64,6 @@ function Book() {
     };
 
 
-    useEffect(() => {
-        startTime();
-    }, []);
-
-    function startTime() {
-        // Lấy Object ngày hiện tại
-        const today = new Date();
-
-        // Giờ, phút, giây hiện tại
-        let h = today.getHours();
-        let m = today.getMinutes();
-        let s = today.getSeconds();
-
-        // Ngày hiện tại
-        const curDay = today.getDate();
-
-        // Tháng hiện tại
-        const curMonth = today.getMonth() + 1;
-
-        // Năm hiện tại
-        const curYear = today.getFullYear();
-
-        // Thứ trong tuần
-        const weekdays = [
-            "Chủ nhật",
-            "Thứ hai",
-            "Thứ ba",
-            "Thứ tư",
-            "Thứ năm",
-            "Thứ sáu",
-            "Thứ bảy",
-        ];
-        const curDw = weekdays[today.getDay()];
-
-        // Chuyển đổi sang dạng 01, 02, 03
-        m = checkTime(m);
-        s = checkTime(s);
-
-        // Ghi ra trình duyệt
-        const timerElement = document.getElementById("timer");
-        if (timerElement) {
-            timerElement.innerHTML =
-                curDw +
-                ", " +
-                curDay +
-                "/" +
-                curMonth +
-                "/" +
-                curYear +
-                "    -   " +
-                h +
-                " giờ " +
-                m +
-                " phút " +
-                s +
-                " giây ";
-        }
-
-        // Dùng hàm setTimeout để thiết lập gọi lại 0.5 giây / lần
-        var t = setTimeout(function () {
-            startTime();
-        }, 500);
-    }
-
-    // Hàm này có tác dụng chuyển những số bé hơn 10 thành dạng 01, 02, 03, ...
-    function checkTime(i) {
-        if (i < 10) {
-            i = "0" + i;
-        }
-        return i;
-    }
-
     // const [selectedImage, setSelectedImage] = useState(null);
 
     // const handleImageChange = (e) => {
@@ -144,7 +78,7 @@ function Book() {
     // };
 
     return (
-        <div className="sb-nav-fixed" onLoad={startTime}>
+        <div className="sb-nav-fixed">
             <Header />
             <div id="layoutSidenav">
                 <Navbar />
@@ -224,7 +158,7 @@ function Book() {
                                                     <img src={selectedImage} alt="Selected" style={{ maxWidth: '100%', marginBottom: "15px" }} />
                                                 </div>
                                             )} */}
-                                            <input type="file" className="form-control" onChange={(e) => setImageUrl(e.target.value)} value={imageUrl} required />
+                                            {/* <input type="file" className="form-control" onChange={(e) => setImageUrl(e.target.value)} value={imageUrl}  /> */}
                                         </div>
                                         <div className="mb-3">
                                             <label htmlFor="publisher1" className="form-label">

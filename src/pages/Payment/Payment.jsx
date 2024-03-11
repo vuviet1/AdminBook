@@ -1,50 +1,63 @@
-import React, { useState, useEffect } from "react";
+import React, { Fragment, useEffect, useState, Component } from "react";
+import Table from "react-bootstrap/Table";
+
 import Header from "../../Component/header";
 import Navbar from "../../Component/nav";
 import Footer from "../../Component/footer";
-import axios from "axios";
+import Pagination from "../../Component/Pagination";
+import request from "../../utils/request";
 
 function Payment() {
   const [payments, setPayments] = useState([]);
+  const [name, setName] = useState("");
+  const [selectedPaymentId, setSelectedPaymentId] = useState(null);
+  const [selectedPayment, setSelectedPayment] = useState([]);
+
+  const [currentPage, setCurrentPage] = useState(0);
+  const itemsPerPage = 5;
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/Payment")
-      .then((response) => response.json())
-      .then((data) => setPayments(data))
-      .catch((error) => console.error("Error fetching payments:", error));
-  }, []);
+    const fetchData = async () => {
+      try {
+        const response = await request.get("Payment");
+        setPayments(response.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
 
-  // thêm payment
-
-  const [name, setName] = useState("");
+    fetchData();
+  }, [request]);
 
   const handleSubmit = async () => {
+    // e.preventDefault();
+
     try {
-      const response = await axios.post("http://localhost:5000/api/Payment", {
+      const response = await request.post("Payment", {
         name: name,
       });
 
-      // Nếu muốn thực hiện một số hành động sau khi thêm thanh toán thành công,
-      // bạn có thể thêm mã ở đây.
+      window.location.reload();
 
-      console.log("Payment added successfully:", response.data);
+      console.log("Payment method added successfully:", response.data);
     } catch (error) {
-      console.error("Failed to add payment:", error);
+      console.error("Failed to add payment method:", error);
     }
   };
 
   // Edit Payment
 
-  const [selectedPayment, setSelectedPayment] = useState(null);
-
   const handleEditButtonClick = async (id) => {
     try {
-      const response = await axios.get(
-        `http://localhost:5000/api/Payment/id=${id}`
-      );
+      // Gọi API để lấy dữ liệu category có id tương ứng
+      const response = await request.get(`Payment/id=${id}`);
+      // console.log(response);
 
       if (response.data) {
+        // Cập nhật state với dữ liệu category
         setSelectedPayment(response.data);
+        // Lưu id của category được chọn
+        setSelectedPaymentId(id);
       } else {
         console.error("No data returned from the API");
       }
@@ -53,110 +66,46 @@ function Payment() {
     }
   };
 
-  const handleNameChange = (e) => {
-    setSelectedPayment({ ...selectedPayment, Name: e.target.value });
-  };
-
   const handleSaveChanges = async () => {
+    // Gọi API để lưu thay đổi cho category có id là selectedCategoryId
     try {
-      await axios.put(
-        `http://localhost:5000/api/Payment/id=${selectedPayment.Id}`,
-        selectedPayment
-      );
+      await request.put(`Payment/id=${selectedPaymentId}`, selectedPayment);
+      console.log(selectedPaymentId);
+      // Đóng modal khi lưu thành công
+      // document.getElementById('editcategory').modal('hide');
       window.location.reload();
+      // Tải lại dữ liệu categories
+      // CODE ĐỂ TẢI LẠI DỮ LIỆU CATEGORIES (nếu cần)
     } catch (error) {
       console.error("Error while saving changes:", error);
     }
   };
-
   // Xóa Payment
 
   const handleDeletePayment = async (id) => {
     try {
-      // Gọi API để xóa payment có id tương ứng
-      await axios.delete(`http://localhost:5000/api/Payment/id=${id}`);
+      // Gọi API để xóa category có id tương ứng
+      await request.delete(`Payment/id=${id}`);
 
       // Tải lại trang sau khi xóa thành công
       window.location.reload();
     } catch (error) {
-      console.error("Error while deleting payment method:", error);
+      console.error("Error while deleting payment:", error);
     }
   };
 
-  useEffect(() => {
-    startTime();
-  }, []);
+  const handlePageClick = (event) => {
+    const newPage = event.selected;
+    setCurrentPage(newPage);
+  };
 
-  function startTime() {
-    // Lấy Object ngày hiện tại
-    const today = new Date();
-
-    // Giờ, phút, giây hiện tại
-    let h = today.getHours();
-    let m = today.getMinutes();
-    let s = today.getSeconds();
-
-    // Ngày hiện tại
-    const curDay = today.getDate();
-
-    // Tháng hiện tại
-    const curMonth = today.getMonth() + 1;
-
-    // Năm hiện tại
-    const curYear = today.getFullYear();
-
-    // Thứ trong tuần
-    const weekdays = [
-      "Chủ nhật",
-      "Thứ hai",
-      "Thứ ba",
-      "Thứ tư",
-      "Thứ năm",
-      "Thứ sáu",
-      "Thứ bảy",
-    ];
-    const curDw = weekdays[today.getDay()];
-
-    // Chuyển đổi sang dạng 01, 02, 03
-    m = checkTime(m);
-    s = checkTime(s);
-
-    // Ghi ra trình duyệt
-    const timerElement = document.getElementById("timer");
-    if (timerElement) {
-      timerElement.innerHTML =
-        curDw +
-        ", " +
-        curDay +
-        "/" +
-        curMonth +
-        "/" +
-        curYear +
-        "    -   " +
-        h +
-        " giờ " +
-        m +
-        " phút " +
-        s +
-        " giây ";
-    }
-
-    // Dùng hàm setTimeout để thiết lập gọi lại 0.5 giây / lần
-    var t = setTimeout(function () {
-      startTime();
-    }, 500);
-  }
-
-  // Hàm này có tác dụng chuyển những số bé hơn 10 thành dạng 01, 02, 03, ...
-  function checkTime(i) {
-    if (i < 10) {
-      i = "0" + i;
-    }
-    return i;
-  }
+  const startIndex = currentPage * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentPayment = payments.slice(startIndex, endIndex);
 
   return (
-    <div className="sb-nav-fixed" onLoad={startTime}>
+    <Fragment>
+    <div className="sb-nav-fixed">
       <Header />
       <div id="layoutSidenav">
         <Navbar />
@@ -183,12 +132,6 @@ function Payment() {
                   >
                     <div>Quản lý hình thức thanh toán</div>
                     <div />
-                    <div style={{ marginLeft: 750 }}>
-                      <div id="current-time" />
-                      <div>
-                        <div id="timer" />
-                      </div>
-                    </div>
                   </li>
                 </ol>
               </div>
@@ -220,7 +163,7 @@ function Payment() {
                     </div>
                   </div>
                   <div className="card-body">
-                    <table className="table table-hover">
+                    <Table className="table table-hover">
                       <thead>
                         <tr>
                           <th>Tên phương thức</th>
@@ -228,8 +171,8 @@ function Payment() {
                         </tr>
                       </thead>
                       <tbody>
-                        {payments.map((payment) => (
-                          <tr key={payment.Id}>
+                        {currentPayment.map((payment, index) => (
+                          <tr key={index}>
                             <td>{payment.Name}</td>
                             <td>
                               {/* Button trigger modal */}
@@ -255,7 +198,11 @@ function Payment() {
                           </tr>
                         ))}
                       </tbody>
-                    </table>
+                    </Table>
+                    <Pagination
+                      pageCount={Math.ceil(payments.length / itemsPerPage)}
+                      handlePageClick={handlePageClick}
+                    />
                   </div>
                 </div>
               </main>
@@ -294,12 +241,17 @@ function Payment() {
                       Tên phương thức thanh toán mới
                     </label>
                     <input
-                      type="text"
-                      className="form-control"
-                      id="name_pay_edit"
-                      value={selectedPayment?.Name}
-                      onChange={handleNameChange}
-                    />
+                        type="text"
+                        className="form-control"
+                        // id="name_pay_edit"
+                        value={selectedPayment.Name}
+                        onChange={(e) =>
+                          setSelectedPayment({
+                            ...selectedPayment,
+                            Name: e.target.value,
+                          })
+                        }
+                      />
                   </div>
                 </div>
                 <div className="modal-footer">
@@ -311,7 +263,7 @@ function Payment() {
                     Hủy bỏ
                   </button>
                   <button
-                    type="button"
+                    type="submit"
                     onClick={handleSaveChanges}
                     className="btn btn-primary"
                   >
@@ -375,7 +327,8 @@ function Payment() {
           </div>
         </>
       </div>
-    </div>
+      </div>
+    </Fragment>
   );
 }
 

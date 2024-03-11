@@ -1,14 +1,76 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+
+function Time() {
+  const [currentTime, setCurrentTime] = useState("");
+
+  useEffect(() => {
+    startTime();
+    const timerId = setInterval(() => {
+      startTime();
+    }, 500);
+
+    // Clear the interval when the component unmounts
+    return () => clearInterval(timerId);
+  }, []);
+
+  function startTime() {
+    const today = new Date();
+    let h = today.getHours();
+    let m = today.getMinutes();
+    let s = today.getSeconds();
+    const curDay = today.getDate();
+    const curMonth = today.getMonth() + 1;
+    const curYear = today.getFullYear();
+
+    const weekdays = [
+      "Chủ nhật",
+      "Thứ hai",
+      "Thứ ba",
+      "Thứ tư",
+      "Thứ năm",
+      "Thứ sáu",
+      "Thứ bảy",
+    ];
+    const curDw = weekdays[today.getDay()];
+
+    m = checkTime(m);
+    s = checkTime(s);
+
+    const formattedTime =
+      curDw +
+      ", " +
+      curDay +
+      "/" +
+      curMonth +
+      "/" +
+      curYear +
+      "    -   " +
+      (h < 10 ? "0" + h : h) +
+      " giờ " +
+      m +
+      " phút " +
+      s +
+      " giây ";
+
+    setCurrentTime(formattedTime);
+  }
+
+  function checkTime(i) {
+    return i < 10 ? "0" + i : i;
+  }
+
+  return (
+    <div id="timer" style={{ color: "white" }}>
+      {currentTime}
+    </div>
+  );
+}
 
 class Header extends React.Component {
   componentDidMount() {
     // Toggle the side navigation
     const sidebarToggle = document.body.querySelector("#sidebarToggle");
     if (sidebarToggle) {
-      // Uncomment Below to persist sidebar toggle between refreshes
-      // if (localStorage.getItem('sb|sidebar-toggle') === 'true') {
-      //     document.body.classList.toggle('sb-sidenav-toggled');
-      // }
       sidebarToggle.addEventListener("click", (event) => {
         event.preventDefault();
         document.body.classList.toggle("sb-sidenav-toggled");
@@ -55,6 +117,15 @@ class Header extends React.Component {
           >
             <i className="fas fa-bars" />
           </button>
+
+          <div style={{ marginLeft: 750 }}>
+            {/* Use the Time component here */}
+            <div id="current-time">
+              <Time />
+            </div>
+            <div>{/* Remove this div, as it's already included above */}</div>
+          </div>
+          
           {/* Navbar Search */}
           <form className="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0"></form>
           <ul className="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">

@@ -1,25 +1,36 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+
 import Header from "../../Component/header";
 import Navbar from "../../Component/nav";
 import Footer from "../../Component/footer";
+import Table from "react-bootstrap/Table";
+
+import Pagination from "../../Component/Pagination";
+import request from "../../utils/request";
 
 function Role() {
   // Hiển thị vai trò
   const [roles, setRoles] = useState([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const itemsPerPage = 5;
 
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/Role");
+        const response = await request.get("Role");
         setRoles(response.data);
       } catch (error) {
-        console.error("Error fetching role data:", error);
+        console.error("Error fetching data:", error);
       }
     };
 
     fetchRoles();
-  }, []);
+  }, [request]);
+
+  const handlePageClick = (event) => {
+    const newPage = event.selected;
+    setCurrentPage(newPage);
+  };
 
   // Thêm vai trò
   const [name, setRoleName] = useState("");
@@ -28,7 +39,7 @@ function Role() {
     event.preventDefault();
 
     try {
-      const response = await axios.post("http://localhost:5000/api/Role", {
+      const response = await request.post("Role", {
         name: name,
       });
 
@@ -44,9 +55,7 @@ function Role() {
 
   const handleEditButtonClick = async (id) => {
     try {
-      const response = await axios.get(
-        `http://localhost:5000/api/Role/id=${id}`
-      );
+      const response = await request.get(`Role/id=${id}`);
 
       if (response.data) {
         setSelectedRole(response.data);
@@ -64,10 +73,7 @@ function Role() {
 
   const handleSaveChanges = async () => {
     try {
-      await axios.put(
-        `http://localhost:5000/api/Role/id=${selectedRole.Id}`,
-        selectedRole
-      );
+      await request.put(`Role/id=${selectedRole.Id}`, selectedRole);
       window.location.reload();
     } catch (error) {
       console.error("Error while saving changes:", error);
@@ -77,7 +83,7 @@ function Role() {
   const handleDeleteRole = async (id) => {
     try {
       // Gọi API để xóa role có id tương ứng
-      await axios.delete(`http://localhost:5000/api/Role/id=${id}`);
+      await request.delete(`Role/id=${id}`);
 
       // Tải lại trang sau khi xóa thành công
       window.location.reload();
@@ -86,80 +92,12 @@ function Role() {
     }
   };
 
-  useEffect(() => {
-    startTime();
-  }, []);
-
-  function startTime() {
-    // Lấy Object ngày hiện tại
-    const today = new Date();
-
-    // Giờ, phút, giây hiện tại
-    let h = today.getHours();
-    let m = today.getMinutes();
-    let s = today.getSeconds();
-
-    // Ngày hiện tại
-    const curDay = today.getDate();
-
-    // Tháng hiện tại
-    const curMonth = today.getMonth() + 1;
-
-    // Năm hiện tại
-    const curYear = today.getFullYear();
-
-    // Thứ trong tuần
-    const weekdays = [
-      "Chủ nhật",
-      "Thứ hai",
-      "Thứ ba",
-      "Thứ tư",
-      "Thứ năm",
-      "Thứ sáu",
-      "Thứ bảy",
-    ];
-    const curDw = weekdays[today.getDay()];
-
-    // Chuyển đổi sang dạng 01, 02, 03
-    m = checkTime(m);
-    s = checkTime(s);
-
-    // Ghi ra trình duyệt
-    const timerElement = document.getElementById("timer");
-    if (timerElement) {
-      timerElement.innerHTML =
-        curDw +
-        ", " +
-        curDay +
-        "/" +
-        curMonth +
-        "/" +
-        curYear +
-        "    -   " +
-        h +
-        " giờ " +
-        m +
-        " phút " +
-        s +
-        " giây ";
-    }
-
-    // Dùng hàm setTimeout để thiết lập gọi lại 0.5 giây / lần
-    var t = setTimeout(function () {
-      startTime();
-    }, 500);
-  }
-
-  // Hàm này có tác dụng chuyển những số bé hơn 10 thành dạng 01, 02, 03, ...
-  function checkTime(i) {
-    if (i < 10) {
-      i = "0" + i;
-    }
-    return i;
-  }
+  const startIndex = currentPage * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentRole = roles.slice(startIndex, endIndex);
 
   return (
-    <div className="sb-nav-fixed" onLoad={startTime}>
+    <div className="sb-nav-fixed">
       <Header />
       <div id="layoutSidenav">
         <Navbar />
@@ -186,12 +124,6 @@ function Role() {
                   >
                     <div>Quản lý thông tin vai trò</div>
                     <div />
-                    <div style={{ marginLeft: 750 }}>
-                      <div id="current-time" />
-                      <div>
-                        <div id="timer" />
-                      </div>
-                    </div>
                   </li>
                 </ol>
               </div>
@@ -221,7 +153,7 @@ function Role() {
                     </div>
                   </div>
                   <div className="card-body">
-                    <table className="table table-hover">
+                    <Table className="table table-hover">
                       <thead>
                         <tr>
                           <th>Tên vai trò</th>
@@ -229,8 +161,8 @@ function Role() {
                         </tr>
                       </thead>
                       <tbody>
-                        {roles.map((role) => (
-                          <tr key={role.Id}>
+                        {currentRole.map((role, index) => (
+                          <tr key={index}>
                             <td>{role.Name}</td>
                             <td>
                               <button
@@ -253,7 +185,11 @@ function Role() {
                           </tr>
                         ))}
                       </tbody>
-                    </table>
+                    </Table>
+                    <Pagination
+                      pageCount={Math.ceil(roles.length / itemsPerPage)}
+                      handlePageClick={handlePageClick}
+                    />
                   </div>
                 </div>
               </main>

@@ -2,99 +2,41 @@ import React, { useState, useEffect } from "react";
 import Header from "../../Component/header";
 import Navbar from "../../Component/nav";
 import Footer from "../../Component/footer";
-import axios from "axios";
+import Table from "react-bootstrap/Table";
+
+import Pagination from "../../Component/Pagination";
+import request from "../../utils/request";
 
 function Customer() {
   // HIỂN THỊ
   const [customers, setCustomers] = useState([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const itemsPerPage = 5;
 
   useEffect(() => {
-    const fetchCustomers = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/Customer");
+        const response = await request.get("Customer");
         setCustomers(response.data);
       } catch (error) {
-        console.error("Error fetching customer data:", error);
+        console.error("Error fetching data:", error);
       }
     };
 
-    fetchCustomers();
-  }, []);
+    fetchData();
+  }, [request]);
+  
+  const handlePageClick = (event) => {
+    const newPage = event.selected;
+    setCurrentPage(newPage);
+  };
 
-  useEffect(() => {
-    startTime();
-  }, []);
-
-  function startTime() {
-    // Lấy Object ngày hiện tại
-    const today = new Date();
-
-    // Giờ, phút, giây hiện tại
-    let h = today.getHours();
-    let m = today.getMinutes();
-    let s = today.getSeconds();
-
-    // Ngày hiện tại
-    const curDay = today.getDate();
-
-    // Tháng hiện tại
-    const curMonth = today.getMonth() + 1;
-
-    // Năm hiện tại
-    const curYear = today.getFullYear();
-
-    // Thứ trong tuần
-    const weekdays = [
-      "Chủ nhật",
-      "Thứ hai",
-      "Thứ ba",
-      "Thứ tư",
-      "Thứ năm",
-      "Thứ sáu",
-      "Thứ bảy",
-    ];
-    const curDw = weekdays[today.getDay()];
-
-    // Chuyển đổi sang dạng 01, 02, 03
-    m = checkTime(m);
-    s = checkTime(s);
-
-    // Ghi ra trình duyệt
-    const timerElement = document.getElementById("timer");
-    if (timerElement) {
-      timerElement.innerHTML =
-        curDw +
-        ", " +
-        curDay +
-        "/" +
-        curMonth +
-        "/" +
-        curYear +
-        "    -   " +
-        h +
-        " giờ " +
-        m +
-        " phút " +
-        s +
-        " giây ";
-    }
-
-    // Dùng hàm setTimeout để thiết lập gọi lại 0.5 giây / lần
-    var t = setTimeout(function () {
-      startTime();
-    }, 500);
-  }
-
-  // Hàm này có tác dụng chuyển những số bé hơn 10 thành dạng 01, 02, 03, ...
-  function checkTime(i) {
-    if (i < 10) {
-      i = "0" + i;
-    }
-    return i;
-  }
+  const startIndex = currentPage * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentCustomer = customers.slice(startIndex, endIndex);
 
   return (
-    <div className="sb-nav-fixed" onLoad={startTime}>
+    <div className="sb-nav-fixed">
       <Header />
       <div id="layoutSidenav">
         <Navbar />
@@ -121,12 +63,6 @@ function Customer() {
                   >
                     <div>Quản lý thông tin khách hàng</div>
                     <div />
-                    <div style={{ marginLeft: 750 }}>
-                      <div id="current-time" />
-                      <div>
-                        <div id="timer" />
-                      </div>
-                    </div>
                   </li>
                 </ol>
               </div>
@@ -157,7 +93,7 @@ function Customer() {
                     </div>
                   </div>
                   <div className="card-body">
-                    <table className="table table-hover">
+                    <Table className="table table-hover">
                       <thead>
                         <tr>
                           <th>Tên khách hàng</th>
@@ -166,8 +102,8 @@ function Customer() {
                         </tr>
                       </thead>
                       <tbody>
-                        {customers.map((customer) => (
-                          <tr key={customer.Id}>
+                      {currentCustomer.map((customer, index) => (
+                          <tr key={index}>
                             <td>{customer.FullName}</td>
                             <td>{customer.PhoneNumber}</td>
                             <td>{customer.Email}</td>
@@ -188,7 +124,11 @@ function Customer() {
                           </tr>
                         ))}
                       </tbody>
-                    </table>
+                    </Table>
+                    <Pagination
+                      pageCount={Math.ceil(customers.length / itemsPerPage)}
+                      handlePageClick={handlePageClick}
+                    />
                   </div>
                 </div>
               </main>
@@ -196,252 +136,6 @@ function Customer() {
           </main>
           <Footer />
         </div>
-
-        {/*Modal*/}
-        <>
-          <div
-            className="modal fade"
-            id="editcategory"
-            data-bs-backdrop="static"
-            data-bs-keyboard="false"
-            tabIndex={-1}
-            aria-labelledby="staticBackdropLabel"
-            aria-hidden="true"
-          >
-            <div className="modal-dialog">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h1 className="modal-title fs-5" id="editBackdropLabel">
-                    Cập nhật danh mục
-                  </h1>
-                  <button
-                    type="button"
-                    className="btn-close"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"
-                  />
-                </div>
-                <div className="modal-body">
-                  <input type="hidden" id="id_pay_edit" />
-                  <div className="mb-3">
-                    <label htmlFor="name_pay_edit" className="form-label">
-                      Tên danh mục
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="name_pay_edit"
-                    />
-                  </div>
-                </div>
-                <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    data-bs-dismiss="modal"
-                  >
-                    Hủy bỏ
-                  </button>
-                  <button type="button" className="btn btn-primary">
-                    Cập nhật
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            className="modal fade"
-            id="addcategory"
-            data-bs-backdrop="static"
-            data-bs-keyboard="false"
-            tabIndex={-1}
-            aria-labelledby="staticBackdropLabel"
-            aria-hidden="true"
-          >
-            <div className="modal-dialog">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h1 className="modal-title fs-5" id="addBackdropLabel">
-                    Thêm danh mục
-                  </h1>
-                  <button
-                    type="button"
-                    className="btn-close"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"
-                  />
-                </div>
-                <div className="modal-body">
-                  <input type="hidden" id="id_pay_add" />
-                  <div className="mb-3">
-                    <label htmlFor="name_pay_add" className="form-label">
-                      Tên danh mục mới
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="name_pay_add"
-                    />
-                  </div>
-                </div>
-                <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    data-bs-dismiss="modal"
-                  >
-                    Hủy bỏ
-                  </button>
-                  <button type="button" className="btn btn-primary">
-                    Thêm mới
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
-
-        {/*    Modal*/}
-        <>
-          <div
-            className="modal fade"
-            id="edit_customer"
-            data-bs-backdrop="static"
-            data-bs-keyboard="false"
-            tabIndex={-1}
-            aria-labelledby="staticBackdropLabel"
-            aria-hidden="true"
-          >
-            <div className="modal-dialog">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h1 className="modal-title fs-5" id="editBackdropLabel">
-                    Cập nhật khách hàng
-                  </h1>
-                  <button
-                    type="button"
-                    className="btn-close"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"
-                  />
-                </div>
-                <div className="modal-body">
-                  <input type="hidden" id="id_pay_edit" />
-                  <div className="mb-3">
-                    <label htmlFor="name_em_edit" className="form-label">
-                      Tên khách hàng
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="name_em_edit"
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="phone" className="form-label">
-                      Số diện thoại
-                    </label>
-                    <input type="text" className="form-control" id="phone" />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="email" className="form-label">
-                      Email
-                    </label>
-                    <input type="text" className="form-control" id="email" />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="address" className="form-label">
-                      Địa chỉ
-                    </label>
-                    <input type="text" className="form-control" id="address" />
-                  </div>
-                </div>
-                <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    data-bs-dismiss="modal"
-                  >
-                    Hủy bỏ
-                  </button>
-                  <button type="button" className="btn btn-primary">
-                    Cập nhật
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            className="modal fade"
-            id="add_customer"
-            data-bs-backdrop="static"
-            data-bs-keyboard="false"
-            tabIndex={-1}
-            aria-labelledby="staticBackdropLabel"
-            aria-hidden="true"
-          >
-            <div className="modal-dialog">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h1 className="modal-title fs-5" id="addBackdropLabel">
-                    Cập nhật khách hàng
-                  </h1>
-                  <button
-                    type="button"
-                    className="btn-close"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"
-                  />
-                </div>
-                <div className="modal-body">
-                  <input type="hidden" id="id_em_add" />
-                  <div className="mb-3">
-                    <label htmlFor="name_em_add" className="form-label">
-                      Tên khách hàng mới
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="name_em_add"
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="phone1" className="form-label">
-                      Số diện thoại
-                    </label>
-                    <input type="text" className="form-control" id="phone1" />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="email1" className="form-label">
-                      Email
-                    </label>
-                    <input type="text" className="form-control" id="email1" />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="address1" className="form-label">
-                      Địa chỉ
-                    </label>
-                    <input type="text" className="form-control" id="address1" />
-                  </div>
-                </div>
-                <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    data-bs-dismiss="modal"
-                  >
-                    Hủy bỏ
-                  </button>
-                  <button type="button" className="btn btn-primary">
-                    Thêm mới
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
-
-        {/*Modal*/}
       </div>
     </div>
   );
