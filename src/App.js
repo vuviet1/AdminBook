@@ -32,6 +32,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+      <Route path="/" element={<Login setLoggedIn={setLoggedIn} />} />
         <Route path="/dashboard" element={loggedIn ? <Index /> : <Navigate to="/" />} />
         <Route path="/category" element={loggedIn ? <Category /> : <Navigate to="/" />} />
         <Route path="/Subcategories/:id" element={loggedIn ? <Subcategories /> : <Navigate to="/" />} />
@@ -40,7 +41,6 @@ function App() {
         <Route path="/order" element={loggedIn ? <Order /> : <Navigate to="/" />} />
         <Route path="/payment" element={loggedIn ? <Payment /> : <Navigate to="/" />} />
         <Route path="/book" element={loggedIn ? <Book /> : <Navigate to="/" />} />
-        <Route path="/" element={<Login setLoggedIn={setLoggedIn} />} />
         <Route path="/role" element={loggedIn ? <Role /> : <Navigate to="/" />} />
         <Route path="/permission" element={loggedIn ? <Permisstion /> : <Navigate to="/" />} />
         <Route path="/EditBook/:id" element={loggedIn ? <EditBook /> : <Navigate to="/" />} />

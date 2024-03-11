@@ -4,6 +4,7 @@ import Header from "../../Component/header";
 import Navbar from "../../Component/nav";
 import Footer from "../../Component/footer";
 
+
 function Permisstion() {
   // Hiển thị quyền
   const [permisstions, setPermisstions] = useState([]);
@@ -91,80 +92,8 @@ function Permisstion() {
     }
   };
 
-  useEffect(() => {
-    startTime();
-  }, []);
-
-  function startTime() {
-    // Lấy Object ngày hiện tại
-    const today = new Date();
-
-    // Giờ, phút, giây hiện tại
-    let h = today.getHours();
-    let m = today.getMinutes();
-    let s = today.getSeconds();
-
-    // Ngày hiện tại
-    const curDay = today.getDate();
-
-    // Tháng hiện tại
-    const curMonth = today.getMonth() + 1;
-
-    // Năm hiện tại
-    const curYear = today.getFullYear();
-
-    // Thứ trong tuần
-    const weekdays = [
-      "Chủ nhật",
-      "Thứ hai",
-      "Thứ ba",
-      "Thứ tư",
-      "Thứ năm",
-      "Thứ sáu",
-      "Thứ bảy",
-    ];
-    const curDw = weekdays[today.getDay()];
-
-    // Chuyển đổi sang dạng 01, 02, 03
-    m = checkTime(m);
-    s = checkTime(s);
-
-    // Ghi ra trình duyệt
-    const timerElement = document.getElementById("timer");
-    if (timerElement) {
-      timerElement.innerHTML =
-        curDw +
-        ", " +
-        curDay +
-        "/" +
-        curMonth +
-        "/" +
-        curYear +
-        "    -   " +
-        h +
-        " giờ " +
-        m +
-        " phút " +
-        s +
-        " giây ";
-    }
-
-    // Dùng hàm setTimeout để thiết lập gọi lại 0.5 giây / lần
-    var t = setTimeout(function () {
-      startTime();
-    }, 500);
-  }
-
-  // Hàm này có tác dụng chuyển những số bé hơn 10 thành dạng 01, 02, 03, ...
-  function checkTime(i) {
-    if (i < 10) {
-      i = "0" + i;
-    }
-    return i;
-  }
-
   return (
-    <div className="sb-nav-fixed" onLoad={startTime}>
+    <div className="sb-nav-fixed">
       <Header />
       <div id="layoutSidenav">
         <Navbar />
@@ -191,12 +120,6 @@ function Permisstion() {
                   >
                     <div>Quản lý thông tin vai trò</div>
                     <div />
-                    <div style={{ marginLeft: 750 }}>
-                      <div id="current-time" />
-                      <div>
-                        <div id="timer" />
-                      </div>
-                    </div>
                   </li>
                 </ol>
               </div>

@@ -25,6 +25,7 @@ function Login() {
       console.log(response.data);
       localStorage.setItem('loggedIn', true);
       setLoggedIn(true);
+      window.location.reload();
     } catch (error) {
       console.error('Login error:', error);
       setError('Invalid username or password.');
