@@ -251,7 +251,7 @@ function Order() {
                 >
                   Hủy bỏ
                 </button>
-                <button type="button" className="btn btn-primary">
+                <button type="submit" className="btn btn-primary">
                   Cập nhật
                 </button>
               </div>
@@ -324,7 +324,7 @@ function Order() {
                   >
                     Hủy bỏ
                   </button>
-                  <button type="button" className="btn btn-primary">
+                  <button type="submit" className="btn btn-primary">
                     Thêm mới
                   </button>
                 </div>
