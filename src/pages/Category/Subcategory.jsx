@@ -2,37 +2,49 @@ import React, { Fragment, useEffect, useState, Component } from "react";
 import Header from "../../Component/header";
 import Navbar from "../../Component/nav";
 import Footer from "../../Component/footer";
+import "./styles.css";
+import { useParams } from "react-router-dom";
+
 import Table from "react-bootstrap/Table";
 import request from "../../utils/request";
+import Pagination from "../../Component/Pagination";
 
 function SubCategory() {
-  const [categories, setCategories] = useState([]);
+  const { id } = useParams();
+
+  const [categories, setCategory] = useState(null);
+
   const [name, setName] = useState("");
-  const [parentId, setParentId] = useState(null);
+  const [parentId, setParentId] = useState(id);
+
+  const [currentPage, setCurrentPage] = useState(0);
+  const itemsPerPage = 5;
 
   useEffect(() => {
-    const fetchData = async (id) => {
+    const fetchCategoryDetails = async () => {
       try {
-        const response = await request.get(`Category/id=${id}`);
+        const response = await request.get(`Category/subcategories/id=${id}`);
         setCategories(response.data);
+
+        // console.log(response.data);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching category details:", error);
       }
     };
 
-    fetchData();
-  }, []);
+    fetchCategoryDetails();
+  }, [id]);
 
-
-
-  const handleSubmit = async () => {
-    // e.preventDefault();
+  const handleSubmitSub = async (e) => {
+    e.preventDefault();
 
     try {
       const response = await request.post("Category", {
         name: name,
-        parent_id: parentId,
+        parentId: parentId,
       });
+
+      // console.log(response.data);
 
       window.location.reload();
 
@@ -42,15 +54,19 @@ function SubCategory() {
     }
   };
 
+  useEffect(() => {
+    setParentId(id); // Cập nhật parentId khi id thay đổi từ useParams()
+  }, [id]);
+
+  console.log("parentId:", parentId);
+
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState([]);
 
   const handleEditButtonClick = async (id) => {
     try {
       // Gọi API để lấy dữ liệu category có id tương ứng
-      const response = await request.get(
-        `Category/id=${id}`
-      );
+      const response = await request.get(`Category/id=${id}`);
       // console.log(response);
 
       if (response.data) {
@@ -66,14 +82,10 @@ function SubCategory() {
     }
   };
 
-  // Function để lưu thay đổi
   const handleSaveChanges = async () => {
     // Gọi API để lưu thay đổi cho category có id là selectedCategoryId
     try {
-      await request.put(
-        `Category/id=${selectedCategoryId}`,
-        selectedCategory
-      );
+      await request.put(`Category/id=${selectedCategoryId}`, selectedCategory);
       console.log(selectedCategoryId);
       // Đóng modal khi lưu thành công
       // document.getElementById('editcategory').modal('hide');
@@ -96,6 +108,15 @@ function SubCategory() {
       console.error("Error while deleting category:", error);
     }
   };
+
+  const handlePageClick = (event) => {
+    const newPage = event.selected;
+    setCurrentPage(newPage);
+  };
+
+  const startIndex = currentPage * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentSubCategories = categories.slice(startIndex, endIndex);
 
   return (
     <Fragment>
@@ -165,7 +186,7 @@ function SubCategory() {
                           </tr>
                         </thead>
                         <tbody>
-                          {categories.map((category, index) => (
+                          {currentSubCategories.map((category, index) => (
                             <tr key={index}>
                               <td>{category.Name}</td>
                               {/* <td>{category.ParentId.Name}</td> */}
@@ -200,6 +221,10 @@ function SubCategory() {
                           ))}
                         </tbody>
                       </Table>
+                      <Pagination
+                        pageCount={Math.ceil(categories.length / itemsPerPage)}
+                        handlePageClick={handlePageClick}
+                      />
                     </div>
                   </div>
                 </main>
@@ -281,7 +306,7 @@ function SubCategory() {
               aria-hidden="true"
             >
               <div className="modal-dialog">
-                <form className="modal-content" onSubmit={handleSubmit}>
+                <form className="modal-content" onSubmit={handleSubmitSub}>
                   <div className="modal-header">
                     <h1 className="modal-title fs-5" id="addBackdropLabel">
                       Thêm danh mục

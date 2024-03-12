@@ -213,7 +213,7 @@ function Employee() {
                           </tr>
                         </thead>
                         <tbody>
-                        {currentAdmins.map((admin, index) => (
+                          {currentAdmins.map((admin, index) => (
                             <tr key={index}>
                               <td>{admin.FullName}</td>
                               <td>{admin.Username}</td>
@@ -344,6 +344,7 @@ function Employee() {
                         }}
                         required
                       >
+                        <option value={0}>-- Chọn vai trò --</option>
                         {roleOptions.map((option) => (
                           <option key={option.Id} value={option.Id}>
                             {option.Name}
@@ -450,7 +451,7 @@ function Employee() {
                         }}
                         required
                       >
-                        <option value={0} disabled>-- Chọn vai trò --</option>
+                        <option value={0}>-- Chọn vai trò --</option>
                         {roleOptions.map((option) => (
                           <option key={option.Id} value={option.Id}>
                             {option.Name}

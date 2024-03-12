@@ -11,7 +11,7 @@ function Book() {
     const [name, setName] = useState('');
     const [price, setPrice] = useState('');
     const [description, setDescription] = useState('');
-    // const [imageUrl, setImageUrl] = useState('');
+    const [imageUrl, setImageUrl] = useState('');
     const [publishYear, setPublishYear] = useState('');
     const [publisher, setPublisher] = useState('');
     const [author, setAuthor] = useState('');
@@ -23,7 +23,7 @@ function Book() {
     useEffect(() => {
         const fetchData = async () => {
           try {
-            const response = await request.get("Category");
+            const response = await request.get("Category/byParntId");
             setCategoryOptions(response.data);
           } catch (error) {
             console.error("Error fetching data:", error);
@@ -37,12 +37,12 @@ function Book() {
         e.preventDefault();
 
         try {
-            const response = await request.post('Book', {
+            const response = await request.post('Book/AddBook', {
                 isbn,
                 name,
                 price,
                 description,
-                // imageUrl,
+                imageUrl,
                 publishYear: parseInt(publishYear), // Convert to number
                 publisher,
                 author,
@@ -158,7 +158,7 @@ function Book() {
                                                     <img src={selectedImage} alt="Selected" style={{ maxWidth: '100%', marginBottom: "15px" }} />
                                                 </div>
                                             )} */}
-                                            {/* <input type="file" className="form-control" onChange={(e) => setImageUrl(e.target.value)} value={imageUrl}  /> */}
+                                            <input type="file" className="form-control" onChange={(e) => setImageUrl(e.target.value)} value={imageUrl} required />
                                         </div>
                                         <div className="mb-3">
                                             <label htmlFor="publisher1" className="form-label">

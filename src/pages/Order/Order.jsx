@@ -188,7 +188,7 @@ function Order() {
         {/*Modal*/}
 
         <div
-          className="modal fade"
+          className="modal fade modal-dialog modal-xl"
           id="edit_order"
           data-bs-backdrop="static"
           data-bs-keyboard="false"
@@ -261,7 +261,7 @@ function Order() {
 
         <>
           <div
-            className="modal fade"
+            className="modal fade modal-dialog modal-xl"
             id="add_order"
             data-bs-backdrop="static"
             data-bs-keyboard="false"
@@ -332,7 +332,7 @@ function Order() {
             </div>
           </div>
           <div
-            className="modal fade"
+            className="modal fade modal-dialog modal-xl"
             id="details_order"
             data-bs-backdrop="static"
             data-bs-keyboard="false"
