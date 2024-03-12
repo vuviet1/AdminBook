@@ -46,28 +46,28 @@ function Employee() {
   }, []);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-  
-    try {
-      const data = {
-        full_name: fullName,
-        username: username,
-        password: password,
-        email: email,
-        role_name: roleName,
-      };
-  
-      console.log("Request Payload:", data); // Log the payload
-  
-      const response = await request.post("Admin", data);
-  
-      console.log(response.data);
-      console.log("Admin added successfully!");
-      window.location.reload();
-    } catch (error) {
-      console.error("Error adding admin:", error);
-    }
-  };
+  e.preventDefault();
+
+  try {
+    const data = {
+      full_name: fullName,
+      username: username,
+      password: password,
+      email: email,
+      role_name: roleName,
+    };
+
+    console.log("Request Payload:", data); // Log the payload
+
+    const response = await request.post("Admin", data);
+
+    console.log(response.data);
+    console.log("Admin added successfully!");
+    window.location.reload();
+  } catch (error) {
+    console.error("Error adding admin:", error);
+  }
+};
 
   const [editFields, setEditFields] = useState({
     FullName: "",
