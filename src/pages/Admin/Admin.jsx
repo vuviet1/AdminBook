@@ -9,15 +9,13 @@ import request from "../../utils/request";
 
 function Employee() {
   const [admins, setAdmins] = useState([]);
+  const [roles, setRoles] = useState([]);
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
-  const [roleName, setRoleName] = useState(null);
-  const [roleId, setRoleId] = useState(0);
-
-  const [roleOptions, setRoleOptions] = useState([]);
+  const [roleName, setRoleName] = useState("");
 
   const [currentPage, setCurrentPage] = useState(0);
   const itemsPerPage = 5;
@@ -31,55 +29,68 @@ function Employee() {
         console.error("Error fetching data:", error);
       }
     };
-
     fetchData();
-  }, [request]);
+  }, []);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData1 = async () => {
       try {
         const rolesResponse = await request.get("Role");
-        setRoleOptions(rolesResponse.data);
+        setRoles(rolesResponse.data);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
 
-    fetchData();
-  }, [request]);
+    fetchData1();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     try {
-      const response = await request.post("Admin", {
-        username,
-        password,
-        email,
-        fullName,
-        roleId,
-        roleName,
-      });
-
-      console.log(response);
-
+      const data = {
+        full_name: fullName,
+        username: username,
+        password: password,
+        email: email,
+        role_name: roleName,
+      };
+  
+      console.log("Request Payload:", data); // Log the payload
+  
+      const response = await request.post("Admin", data);
+  
+      console.log(response.data);
       console.log("Admin added successfully!");
-
-      // Change window location to '/admin'
       window.location.reload();
     } catch (error) {
       console.error("Error adding admin:", error);
     }
   };
 
-  const [selectedAdmin, setSelectedAdmin] = useState(null);
+  const [editFields, setEditFields] = useState({
+    FullName: "",
+    Username: "",
+    Password: "",
+    Email: "",
+    Role: "",
+  });
+
+  const [selectedAdmin, setSelectedAdmin] = useState({
+    FullName: "",
+    Username: "",
+    Password: "",
+    Email: "",
+    Role: "",
+  });
 
   const handleEditButtonClick = async (id) => {
     try {
       const response = await request.get(`Admin/id=${id}`);
 
       if (response.data) {
-        setSelectedAdmin(response.data);
+        setEditFields(response.data);
       } else {
         console.error("No data returned from the API");
       }
@@ -88,33 +99,13 @@ function Employee() {
     }
   };
 
-  const handleNameChange = (e) => {
-    setSelectedAdmin({ ...selectedAdmin, Username: e.target.value });
-    // setSelectedAdmin({ ...selectedAdmin, RoleId: e.target.value });
-  };
-
-  const handlePasswordChange = (e) => {
-    setSelectedAdmin({ ...selectedAdmin, Password: e.target.value });
-    // setSelectedAdmin({ ...selectedAdmin, RoleId: e.target.value });
-  };
-
-  const handleEmailChange = (e) => {
-    setSelectedAdmin({ ...selectedAdmin, Email: e.target.value });
-    // setSelectedAdmin({ ...selectedAdmin, RoleId: e.target.value });
-  };
-
-  const handleFullNameChange = (e) => {
-    setSelectedAdmin({ ...selectedAdmin, FullName: e.target.value });
-    // setSelectedAdmin({ ...selectedAdmin, RoleId: e.target.value });
-  };
-
-  const handleRoleIdChange = (e) => {
-    setSelectedAdmin({ ...selectedAdmin, RoleId: e.target.value });
+  const handleEditFieldChange = (e, fieldName) => {
+    setEditFields({ ...editFields, [fieldName]: e.target.value });
   };
 
   const handleSaveChanges = async () => {
     try {
-      await request.put(`Admin/id=${selectedAdmin.Id}`, selectedAdmin);
+      await request.put(`Admin/id=${editFields.Id}`, editFields);
       window.location.reload();
     } catch (error) {
       console.error("Error while saving changes:", error);
@@ -125,8 +116,6 @@ function Employee() {
     try {
       // Gọi API để xóa category có id tương ứng
       await request.delete(`Admin/id=${id}`);
-
-      // Tải lại trang sau khi xóa thành công
       window.location.reload();
     } catch (error) {
       console.error("Error while deleting category:", error);
@@ -290,8 +279,9 @@ function Employee() {
                       <input
                         type="text"
                         className="form-control"
-                        value={selectedAdmin?.FullName}
-                        onChange={handleFullNameChange}
+                        id="fullname_admin_edit"
+                        value={editFields?.FullName || ""}
+                        onChange={(e) => handleEditFieldChange(e, "FullName")}
                       />
                     </div>
                     <div className="mb-3">
@@ -301,8 +291,9 @@ function Employee() {
                       <input
                         type="text"
                         className="form-control"
-                        value={selectedAdmin?.Username}
-                        onChange={handleNameChange}
+                        id="username_admin_edit"
+                        value={editFields?.Username || ""}
+                        onChange={(e) => handleEditFieldChange(e, "Username")}
                       />
                     </div>
                     <div className="mb-3">
@@ -310,10 +301,11 @@ function Employee() {
                         Email
                       </label>
                       <input
-                        type="text"
+                        type="email"
                         className="form-control"
-                        value={selectedAdmin?.Email}
-                        onChange={handleEmailChange}
+                        id="email_admin_edit"
+                        value={editFields?.Email || ""}
+                        onChange={(e) => handleEditFieldChange(e, "Email")}
                       />
                     </div>
                     <div className="mb-3">
@@ -323,31 +315,26 @@ function Employee() {
                       <input
                         type="password"
                         className="form-control"
-                        value={selectedAdmin?.Password}
-                        onChange={handlePasswordChange}
+                        id="password_admin_edit"
+                        value={editFields?.Password || ""}
+                        onChange={(e) => handleEditFieldChange(e, "Password")}
                       />
                     </div>
                     <div className="mb-3">
                       <label htmlFor="role" className="form-label">
-                        Quyền
+                        Vai trò
                       </label>
 
                       <select
                         className="form-select"
-                        value={roleId}
-                        onChange={(e) => {
-                          setRoleId(e.target.value);
-                          const selectedRole = roleOptions.find(
-                            (option) => option.Id === parseInt(e.target.value)
-                          );
-                          setRoleName(selectedRole ? selectedRole.Name : null);
-                        }}
-                        required
+                        id="role_admin_edit"
+                        aria-label="Default select example"
+                        value={editFields?.RoleName || ""}
+                        onChange={(e) => handleEditFieldChange(e, "RoleName")}
                       >
-                        <option value={0}>-- Chọn vai trò --</option>
-                        {roleOptions.map((option) => (
-                          <option key={option.Id} value={option.Id}>
-                            {option.Name}
+                        {roles.map((role) => (
+                          <option key={role.Id} value={role.Id}>
+                            {role.Name}
                           </option>
                         ))}
                       </select>
@@ -397,8 +384,9 @@ function Employee() {
                       </label>
                       <input
                         type="text"
-                        className="form-control"
                         value={fullName}
+                        className="form-control"
+                        id="fullname_admin_add"
                         onChange={(e) => setFullName(e.target.value)}
                       />
                     </div>
@@ -408,8 +396,9 @@ function Employee() {
                       </label>
                       <input
                         type="text"
-                        className="form-control"
                         value={username}
+                        className="form-control"
+                        id="username_admin_add"
                         onChange={(e) => setUsername(e.target.value)}
                       />
                     </div>
@@ -418,9 +407,10 @@ function Employee() {
                         Email
                       </label>
                       <input
-                        type="text"
-                        className="form-control"
+                        type="email"
                         value={email}
+                        className="form-control"
+                        id="email_admin_add"
                         onChange={(e) => setEmail(e.target.value)}
                       />
                     </div>
@@ -430,8 +420,9 @@ function Employee() {
                       </label>
                       <input
                         type="password"
-                        className="form-control"
                         value={password}
+                        className="form-control"
+                        id="password_admin_add"
                         onChange={(e) => setPassword(e.target.value)}
                       />
                     </div>
@@ -441,20 +432,17 @@ function Employee() {
                       </label>
                       <select
                         className="form-select"
-                        value={roleId}
-                        onChange={(e) => {
-                          setRoleId(e.target.value);
-                          const selectedRole = roleOptions.find(
-                            (option) => option.Id === parseInt(e.target.value)
-                          );
-                          setRoleName(selectedRole ? selectedRole.Name : null);
-                        }}
-                        required
+                        id="role_admin_add"
+                        aria-label="Default select example"
+                        value={roleName}
+                        onChange={(e) => setRoleName(e.target.value)}
                       >
-                        <option value={0}>-- Chọn vai trò --</option>
-                        {roleOptions.map((option) => (
-                          <option key={option.Id} value={option.Id}>
-                            {option.Name}
+                        <option value="" disabled>
+                          Vai trò
+                        </option>
+                        {roles.map((role) => (
+                          <option key={role.Id} value={role.Name}>
+                            {role.Name}
                           </option>
                         ))}
                       </select>

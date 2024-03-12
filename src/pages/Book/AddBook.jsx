@@ -23,7 +23,7 @@ function Book() {
     useEffect(() => {
         const fetchData = async () => {
           try {
-            const response = await request.get("Category/byParntId");
+            const response = await request.get("Category");
             setCategoryOptions(response.data);
           } catch (error) {
             console.error("Error fetching data:", error);
@@ -37,7 +37,7 @@ function Book() {
         e.preventDefault();
 
         try {
-            const response = await request.post('Book/AddBook', {
+            const response = await request.post('Book', {
                 isbn,
                 name,
                 price,
@@ -107,12 +107,6 @@ function Book() {
                                     >
                                         <div>
                                             Quản lý sách / Thêm sách
-                                        </div>
-                                        <div style={{ marginLeft: 750 }}>
-                                            <div id="current-time" />
-                                            <div>
-                                                <div id="timer" />
-                                            </div>
                                         </div>
                                     </li>
                                 </ol>

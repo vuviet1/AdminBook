@@ -45,7 +45,7 @@ function Time() {
       "/" +
       curYear +
       "    -   " +
-      (h < 10 ? "0" + h : h) +
+      h +
       " giờ " +
       m +
       " phút " +

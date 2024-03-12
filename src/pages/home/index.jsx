@@ -252,12 +252,6 @@ function Index() {
                                     >
                                         <div>Bảng điều khiển</div>
                                         <div />
-                                        <div style={{ marginLeft: 750 }}>
-                                            <div id="current-time" />
-                                            <div>
-                                                <div id="timer" />
-                                            </div>
-                                        </div>
                                     </li>
                                 </ol>
                             </div>

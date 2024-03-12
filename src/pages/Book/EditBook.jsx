@@ -92,12 +92,6 @@ function EditBook() {
                                         <div>
                                             Quản lý sách / Sửa sách
                                         </div>
-                                        <div style={{ marginLeft: 750 }}>
-                                            <div id="current-time" />
-                                            <div>
-                                                <div id="timer" />
-                                            </div>
-                                        </div>
                                     </li>
                                 </ol>
                             </div>
