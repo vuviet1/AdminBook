@@ -2,7 +2,7 @@ import React, { Fragment, useEffect, useState, Component } from "react";
 import Header from "../../Component/header";
 import Navbar from "../../Component/nav";
 import Footer from "../../Component/footer";
-import "./styles.css";
+// import "./styles.css";
 import { useParams } from "react-router-dom";
 
 import Table from "react-bootstrap/Table";
@@ -23,8 +23,8 @@ function SubCategory() {
   useEffect(() => {
     const fetchCategoryDetails = async () => {
       try {
-        const response = await request.get(`Category/subcategories/id=${id}`);
-        setCategories(response.data);
+        const response = await request.get(`Category/id=${id}`);
+        setCategory(response.data);
 
         // console.log(response.data);
       } catch (error) {
@@ -118,6 +118,8 @@ function SubCategory() {
   const endIndex = startIndex + itemsPerPage;
   const currentSubCategories = categories.slice(startIndex, endIndex);
 
+  const CURRENT_TYPE_USER = localStorage.getItem('roleName');
+
   return (
     <Fragment>
       <div className="sb-nav-fixed">
@@ -165,6 +167,7 @@ function SubCategory() {
                           Danh mục
                         </div>
                         <div>
+                        {CURRENT_TYPE_USER === "Admin" && (
                           <button
                             type="button"
                             className="btn btn-primary add-cate"
@@ -174,6 +177,7 @@ function SubCategory() {
                             <i className="fa-solid fa-plus" />
                             Thêm danh mục
                           </button>
+                        )}
                         </div>
                       </div>
                     </div>
@@ -189,9 +193,8 @@ function SubCategory() {
                           {currentSubCategories.map((category, index) => (
                             <tr key={index}>
                               <td>{category.Name}</td>
-                              {/* <td>{category.ParentId.Name}</td> */}
                               <td>
-                                {/* Button trigger modal */}
+                              {CURRENT_TYPE_USER === "Admin" && (
                                 <button
                                   type="button"
                                   className="btn btn-warning"
@@ -204,6 +207,8 @@ function SubCategory() {
                                 >
                                   <i className="fa-regular fa-pen-to-square" />
                                 </button>
+                              )}
+                              {CURRENT_TYPE_USER === "Admin" && (
                                 <button
                                   className="btn btn-danger"
                                   style={{ marginRight: "15px" }}
@@ -213,6 +218,7 @@ function SubCategory() {
                                 >
                                   <i className="fa-solid fa-trash" />
                                 </button>
+                              )}
                                 <button className="btn btn-info">
                                   <i class="fa-solid fa-circle-info"></i>
                                 </button>

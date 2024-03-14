@@ -108,6 +108,8 @@ function Category() {
   const endIndex = startIndex + itemsPerPage;
   const currentCategories = categories.slice(startIndex, endIndex);
 
+  const CURRENT_TYPE_USER = localStorage.getItem('roleName');
+
   return (
     <Fragment>
       <div className="sb-nav-fixed">
@@ -155,6 +157,7 @@ function Category() {
                           Danh mục
                         </div>
                         <div>
+                        {CURRENT_TYPE_USER === "Admin" && (
                           <button
                             type="button"
                             className="btn btn-primary add-category"
@@ -164,6 +167,7 @@ function Category() {
                             <i className="fa-solid fa-plus" />
                             Thêm danh mục
                           </button>
+                        )}
                         </div>
                       </div>
                     </div>
@@ -183,6 +187,7 @@ function Category() {
                               {/* <td>{category.ParentId.Name}</td> */}
                               <td>
                                 {/* Button trigger modal */}
+                                {CURRENT_TYPE_USER === "Admin" && (
                                 <button
                                   type="button"
                                   className="btn btn-warning"
@@ -195,6 +200,8 @@ function Category() {
                                 >
                                   <i className="fa-regular fa-pen-to-square" />
                                 </button>
+                                )}
+                                {CURRENT_TYPE_USER === "Admin" && (
                                 <button
                                   className="btn btn-danger"
                                   style={{ marginRight: "15px" }}
@@ -204,11 +211,12 @@ function Category() {
                                 >
                                   <i className="fa-solid fa-trash" />
                                 </button>
+                                )}
                                 <Link
                                   to={"/subcategories/" + category.Id}
                                   className="btn btn-info"
                                 >
-                                  <i class="fa-solid fa-circle-info"></i>
+                                  <i className="fa-solid fa-circle-info"></i>
                                 </Link>
                               </td>
                             </tr>
