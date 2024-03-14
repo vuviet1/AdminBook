@@ -20,6 +20,7 @@ function Category() {
   const [currentPage, setCurrentPage] = useState(0);
   const itemsPerPage = 5;
 
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -175,6 +176,7 @@ function Category() {
                           </tr>
                         </thead>
                         <tbody>
+                          
                         {currentCategories.map((category, index) => (
                             <tr key={index}>
                               <td>{category.Name}</td>

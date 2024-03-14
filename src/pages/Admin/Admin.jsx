@@ -46,28 +46,28 @@ function Employee() {
   }, []);
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    const data = {
-      full_name: fullName,
-      username: username,
-      password: password,
-      email: email,
-      role_name: roleName,
-    };
+    try {
+      const data = {
+        full_name: fullName,
+        username: username,
+        password: password,
+        email: email,
+        role_name: roleName,
+      };
 
-    console.log("Request Payload:", data); // Log the payload
+      console.log("Request Payload:", data); // Log the payload
 
-    const response = await request.post("Admin", data);
+      const response = await request.post("Admin", data);
 
-    console.log(response.data);
-    console.log("Admin added successfully!");
-    window.location.reload();
-  } catch (error) {
-    console.error("Error adding admin:", error);
-  }
-};
+      console.log(response.data);
+      console.log("Admin added successfully!");
+      window.location.reload();
+    } catch (error) {
+      console.error("Error adding admin:", error);
+    }
+  };
 
   const [editFields, setEditFields] = useState({
     FullName: "",
@@ -131,6 +131,8 @@ function Employee() {
   const endIndex = startIndex + itemsPerPage;
   const currentAdmins = admins.slice(startIndex, endIndex);
 
+  const CURRENT_TYPE_USER = localStorage.getItem('roleName');
+
   return (
     <Fragment>
       <div className="sb-nav-fixed">
@@ -178,15 +180,17 @@ function Employee() {
                           Nhân viên
                         </div>
                         <div>
-                          <button
-                            type="button"
-                            className="btn btn-primary add-payment"
-                            data-bs-toggle="modal"
-                            data-bs-target="#addemployee"
-                          >
-                            <i className="fa-solid fa-plus" />
-                            Thêm nhân viên
-                          </button>
+                          {CURRENT_TYPE_USER === "Admin" && (
+                            <button
+                              type="button"
+                              className="btn btn-primary add-payment"
+                              data-bs-toggle="modal"
+                              data-bs-target="#addemployee"
+                            >
+                              <i className="fa-solid fa-plus" />
+                              Thêm nhân viên
+                            </button>
+                          )} 
                         </div>
                       </div>
                     </div>
@@ -198,7 +202,9 @@ function Employee() {
                             <th>Username</th>
                             <th>Email</th>
                             <th>Quyền</th>
-                            <th>Hành động</th>
+                            {CURRENT_TYPE_USER === "Admin" && (
+                              <th>Hành động</th>
+                            )}
                           </tr>
                         </thead>
                         <tbody>
@@ -208,27 +214,28 @@ function Employee() {
                               <td>{admin.Username}</td>
                               <td>{admin.Email}</td>
                               <td>{admin.RoleName}</td>
-                              <td>
-                                {/* Button trigger modal */}
-                                <button
-                                  type="button"
-                                  className="btn btn-success"
-                                  data-bs-toggle="modal"
-                                  data-bs-target="#editemployee"
-                                  style={{ marginRight: "15px" }}
-                                  onClick={() =>
-                                    handleEditButtonClick(admin.Id)
-                                  }
-                                >
-                                  <i className="fa-regular fa-pen-to-square" />
-                                </button>
-                                <button
-                                  className="btn btn-danger"
-                                  onClick={() => handleDeleteAdmin(admin.Id)}
-                                >
-                                  <i className="fa-solid fa-trash" />
-                                </button>
-                              </td>
+                              {CURRENT_TYPE_USER === "Admin" && (
+                                <td>
+                                  <button
+                                    type="button"
+                                    className="btn btn-success"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#editemployee"
+                                    style={{ marginRight: "15px" }}
+                                    onClick={() =>
+                                      handleEditButtonClick(admin.Id)
+                                    }
+                                  >
+                                    <i className="fa-regular fa-pen-to-square" />
+                                  </button>
+                                  <button
+                                    className="btn btn-danger"
+                                    onClick={() => handleDeleteAdmin(admin.Id)}
+                                  >
+                                    <i className="fa-solid fa-trash" />
+                                  </button>
+                                </td>
+                              )}
                             </tr>
                           ))}
                         </tbody>

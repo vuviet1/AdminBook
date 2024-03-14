@@ -107,7 +107,7 @@ class Header extends React.Component {
             href="/"
             style={{ textAlign: "center" }}
           >
-            Admin
+            Trang quản lý
           </a>
           {/* Sidebar Toggle*/}
           <button
