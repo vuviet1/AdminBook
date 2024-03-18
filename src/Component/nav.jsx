@@ -15,7 +15,7 @@ const Navbar = () => {
         >
           <div className="sb-sidenav-menu">
             <div style={{ textAlign: "center" }}>
-              Người dùng: {CURRENT_TYPE_USER} {/* Hiển thị roleName */}
+              Người dùng: {CURRENT_TYPE_USER} 
             </div>
             <div className="nav">
               <Link to={"/dashboard"} className="nav-link">
